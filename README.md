@@ -2,7 +2,7 @@
 
 A shell-integrated tool for exploring GitHub repositories, code, and more.
 
-![GitHub Explorer Demo](https://github.com/yourusername/gh-explorer/raw/main/docs/demo.gif)
+![GitHub Explorer Demo](https://github.com/taygetea/github-explorer/raw/master/docs/demo.gif)
 
 ## Features
 
@@ -38,8 +38,8 @@ pip install gh-explorer
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/gh-explorer.git
-cd gh-explorer
+git clone https://github.com/taygetea/github-explorer.git
+cd github-explorer
 
 # Create a virtual environment (optional but recommended)
 python -m venv venv
