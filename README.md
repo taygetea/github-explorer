@@ -28,6 +28,24 @@ GitHub Explorer bridges the gap between raw command-line tools and full-screen T
 - Python 3.8 or higher
 - GitHub CLI (`gh`) installed and authenticated
 
+### Install with UV (Recommended)
+
+[UV](https://github.com/astral-sh/uv) is a fast Python package installer and resolver. To install GitHub Explorer with UV:
+
+```bash
+# Install UV if you don't have it yet
+curl -sSf https://astral.sh/uv/install.sh | bash
+
+# Install GitHub Explorer
+uv pip install gh-explorer
+```
+
+You can also install directly from GitHub:
+
+```bash
+uv pip install git+https://github.com/taygetea/github-explorer.git
+```
+
 ### Install from PyPI (coming soon)
 
 ```bash
@@ -41,12 +59,33 @@ pip install gh-explorer
 git clone https://github.com/taygetea/github-explorer.git
 cd github-explorer
 
-# Create a virtual environment (optional but recommended)
+# Using UV
+uv venv
+source .venv/bin/activate
+uv pip install -e .
+
+# Or using traditional pip
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install the package
 pip install -e .
+```
+
+### Installation on Termux
+
+GitHub Explorer works great on Termux! Here's how to install it:
+
+```bash
+# Install prerequisites
+pkg install python gh
+
+# Install UV
+curl -sSf https://astral.sh/uv/install.sh | bash
+
+# Install GitHub Explorer
+uv pip install git+https://github.com/taygetea/github-explorer.git
+
+# Verify installation
+ghx --help
 ```
 
 ## Usage
