@@ -8,6 +8,7 @@ from rich.panel import Panel
 from rich.text import Text
 
 from gh_explorer.utils.formatting import format_repo_list
+from gh_explorer.ui.widgets.repo_browser import RepoBrowser
 
 def search_repos_interactive(ctx: Dict[str, Any]) -> None:
     """Interactive repository search."""
@@ -27,22 +28,19 @@ def search_repos_interactive(ctx: Dict[str, Any]) -> None:
     console.print("[bold]Filter options (press Enter to skip):[/bold]")
     language = console.input("Language: ")
     topic = console.input("Topic: ")
+    
+    # Default sort is stars (1)
     sort_options = {
         "1": "stars",
         "2": "forks",
         "3": "updated",
         "": "stars"  # Default
     }
-    sort_choice = console.input("Sort by ([1] Stars, [2] Forks, [3] Recently updated): ")
-    sort = sort_options.get(sort_choice, "stars")
+    # No need to prompt for sort, default to stars (most common use case)
+    sort = "stars"
     
+    # Limit defaults to 20
     limit = 20
-    try:
-        limit_input = console.input(f"Number of results (default {limit}): ")
-        if limit_input:
-            limit = int(limit_input)
-    except ValueError:
-        console.print(f"[warning]Invalid number, using default ({limit}).[/warning]")
     
     # Perform search
     console.print()
@@ -67,12 +65,13 @@ def search_repos_interactive(ctx: Dict[str, Any]) -> None:
             console.print("[warning]No repositories found matching your criteria.[/warning]")
             return
         
-        # Display results
+        # Always use the simple output mode for now
+        # Until we can properly debug the terminal capabilities
         table = format_repo_list(repos)
         console.print(table)
         console.print()
         
-        # Let user select a repo to view
+        # Let user select a repo to view with the classic interface
         view_repo_details(ctx, repos)
         
     except Exception as e:
@@ -85,17 +84,12 @@ def view_repo_details(ctx: Dict[str, Any], repos: List[Dict[str, Any]]) -> None:
     
     while True:
         choice = console.input(
-            "Enter number to view, 'f' for filters, 's' for sort, or 'q' to return: "
+            "Enter number to view, 'q' to return (Esc also works): "
         )
         
-        if choice.lower() == 'q':
+        # Handle quit conditions - empty string could be ESC key
+        if choice.lower() == 'q' or not choice:
             return
-        elif choice.lower() == 'f':
-            console.print("[info]Filter option not implemented yet[/info]")
-            continue
-        elif choice.lower() == 's':
-            console.print("[info]Sort option not implemented yet[/info]")
-            continue
         
         try:
             idx = int(choice) - 1
@@ -117,9 +111,13 @@ def view_repo_details(ctx: Dict[str, Any], repos: List[Dict[str, Any]]) -> None:
                 console.print("[bold]Options:[/bold]")
                 console.print("  [bold]1[/bold]. Open in browser")
                 console.print("  [bold]2[/bold]. Clone repository")
-                console.print("  [bold]3[/bold]. Back to search results")
+                console.print("  [bold]3[/bold] or any other key. Back to search results")
                 
-                action = console.input("\nEnter choice (1-3): ")
+                action = console.input("\nEnter choice (1-3 or Esc to return): ")
+                
+                # Empty input (possibly from ESC key) returns to results
+                if not action:
+                    continue
                 
                 if action == '1':
                     client.open_in_browser(selected_repo)
@@ -135,4 +133,4 @@ def view_repo_details(ctx: Dict[str, Any], repos: List[Dict[str, Any]]) -> None:
             else:
                 console.print("[warning]Invalid selection. Please try again.[/warning]")
         except ValueError:
-            console.print("[warning]Please enter a number, 'f', 's', or 'q'.[/warning]")
+            console.print("[warning]Please enter a number or 'q'.[/warning]")

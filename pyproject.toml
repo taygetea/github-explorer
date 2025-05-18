@@ -11,6 +11,7 @@ authors = [
 dependencies = [
     "rich>=13.0.0",
     "click>=8.0.0",
+    "readchar>=4.0.0",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",

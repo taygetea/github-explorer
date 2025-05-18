@@ -30,7 +30,7 @@ def display_main_menu(ctx: Dict[str, Any]) -> None:
             ("4", "Create a Gist"),
             ("5", "Search by Topic"),
             ("6", "Search by Language"),
-            ("0", "Exit")
+            ("0", "Exit (Esc also works)")
         ]
         
         for key, desc in options:
@@ -39,7 +39,8 @@ def display_main_menu(ctx: Dict[str, Any]) -> None:
         console.print()
         choice = console.input("Enter your choice (0-6): ")
         
-        if choice == "0":
+        # Empty input could be from ESC key
+        if choice == "0" or not choice:
             console.print("[info]Exiting GitHub Explorer. Goodbye![/info]")
             break
         elif choice == "1":
@@ -58,5 +59,7 @@ def display_main_menu(ctx: Dict[str, Any]) -> None:
             console.print("[warning]Invalid choice. Please try again.[/warning]")
         
         # Wait for user acknowledgment after completing action
-        if choice in ["3", "4", "5", "6"] or choice not in ["0", "1", "2"]:
-            console.input("\nPress Enter to continue...")
+        if choice in ["3", "4", "5", "6"] or choice not in ["0", "1", "2", ""]:
+            inp = console.input("\nPress Enter to continue (or Esc to exit): ")
+            if not inp:  # Empty input could be from ESC key
+                break

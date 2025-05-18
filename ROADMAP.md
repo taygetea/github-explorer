@@ -1,13 +1,48 @@
 # GitHub Explorer: Roadmap & Milestones
 
-## Release Milestones
+## Current Status
 
-### v0.1.0 - Core Functionality (MVP)
-- Basic TUI with navigation menus (Command-line based)
-- Repository search with basic filters
-- Repository viewing (details and README)
-- Code search with basic results
-- Gist creation from file or text
+The GitHub Explorer is a shell-integrated GitHub exploration tool that allows users to:
+
+1. Search for repositories and code on GitHub
+2. View repository details, READMEs, and file structures
+3. Clone repositories and open them in a web browser
+4. Operate with better UX (sensible defaults, improved keyboard handling)
+
+## Recent Improvements
+
+- Added support for running the tool via UV tool installation
+- Improved error handling and fallback mechanisms
+- Better keyboard support (j/k navigation, escape handling)
+- Enhanced CLI to accept arguments without quotes
+- Simplified repository search with better defaults
+- Added an interactive repository browser (currently disabled, needs further terminal compatibility work)
+
+## Development Instructions
+
+To develop and test changes:
+
+1. Make your code changes in the source directory
+2. Reinstall the tool with UV:
+   ```bash
+   cd /path/to/github-explorer && uv tool install -e .
+   ```
+3. Run the tool to test your changes:
+   ```bash
+   ghx [command] [arguments]
+   ```
+
+For testing the interactive browser locally (when fixed):
+```bash
+GHX_INTERACTIVE=true ghx search-repos [query]
+```
+
+To disable the interactive mode:
+```bash
+GHX_INTERACTIVE=false ghx search-repos [query]
+```
+
+## Release Milestones
 
 ### v0.2.0 - Textual-based UI
 - Convert from simple TUI to Textual framework

@@ -44,7 +44,7 @@ def cli(ctx, debug):
         display_main_menu(ctx.obj)
 
 @cli.command()
-@click.argument('query', required=False)
+@click.argument('query', required=False, nargs=-1)
 @click.option('--limit', '-l', default=20, help='Maximum number of results')
 @click.option('--language', help='Filter by programming language')
 @click.option('--topic', help='Filter by topic')
@@ -54,7 +54,10 @@ def cli(ctx, debug):
 @click.pass_context
 def search_repos(ctx, query, limit, language, topic, sort, json_output):
     """Search for GitHub repositories"""
-    if not query:
+    # Convert tuple of arguments to a space-separated string if provided
+    query_str = ' '.join(query) if query else ''
+    
+    if not query_str:
         # If no query provided, go to interactive mode
         search_repos_interactive(ctx.obj)
         return
@@ -62,10 +65,10 @@ def search_repos(ctx, query, limit, language, topic, sort, json_output):
     client = ctx.obj['CLIENT']
     console = ctx.obj['CONSOLE']
     
-    console.print(f"[info]Searching for repositories: [/info][repo]{query}[/repo]")
+    console.print(f"[info]Searching for repositories: [/info][repo]{query_str}[/repo]")
     
     repos = client.search_repositories(
-        query=query, 
+        query=query_str, 
         limit=limit,
         language=language,
         topic=topic,
@@ -76,8 +79,29 @@ def search_repos(ctx, query, limit, language, topic, sort, json_output):
         import json
         console.print(json.dumps(repos))
     else:
+        # Always use the simple output mode for now
+        # Until we can properly debug the terminal capabilities
+        from gh_explorer.utils.formatting import format_repo_list
         formatted = format_repo_list(repos)
         console.print(formatted)
+        
+        # Only prompt in interactive mode
+        if sys.stdin.isatty():
+            console.print()
+            try:
+                choice = console.input("Enter number to view or press Enter to exit: ")
+                if choice and choice.isdigit():
+                    idx = int(choice) - 1
+                    if 0 <= idx < len(repos):
+                        repo_name = repos[idx]["fullName"]
+                        client = ctx.obj['CLIENT']
+                        repo_details = client.get_repository(repo_name)
+                        from gh_explorer.utils.formatting import format_repo_details
+                        formatted = format_repo_details(repo_details)
+                        console.print(formatted)
+            except (EOFError, KeyboardInterrupt):
+                # Handle terminal input errors gracefully
+                pass
 
 @cli.command()
 @click.argument('repo', required=True)
@@ -106,20 +130,23 @@ def view_repo(ctx, repo, web, json_output):
         console.print(formatted)
 
 @cli.command()
-@click.argument('query', required=True)
+@click.argument('query', required=True, nargs=-1)
 @click.option('--limit', '-l', default=20, help='Maximum number of results')
 @click.option('--language', help='Filter by programming language')
 @click.option('--json', 'json_output', is_flag=True, help='Output as JSON')
 @click.pass_context
 def search_code(ctx, query, limit, language, json_output):
     """Search for code in GitHub repositories"""
+    # Convert tuple of arguments to a space-separated string
+    query_str = ' '.join(query)
+    
     client = ctx.obj['CLIENT']
     console = ctx.obj['CONSOLE']
     
-    console.print(f"[info]Searching for code: [/info]{query}")
+    console.print(f"[info]Searching for code: [/info]{query_str}")
     
     results = client.search_code(
-        query=query,
+        query=query_str,
         limit=limit,
         language=language
     )
@@ -134,7 +161,19 @@ def search_code(ctx, query, limit, language, json_output):
 
 def main():
     """Main entry point for the CLI"""
+    import signal
+    
+    # Handle keyboard interrupts (Ctrl+C) gracefully
+    def signal_handler(sig, frame):
+        console.print("\n[info]Exiting GitHub Explorer. Goodbye![/info]")
+        sys.exit(0)
+    
+    # Register signal handlers
+    signal.signal(signal.SIGINT, signal_handler)
+    
     try:
+        # Set environment variable for proper Escape key handling in terminal
+        os.environ["ESCDELAY"] = "25"  # 25ms delay for escape key (faster response)
         cli(obj={})
     except KeyboardInterrupt:
         console.print("\n[info]Exiting GitHub Explorer. Goodbye![/info]")

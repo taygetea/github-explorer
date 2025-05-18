@@ -72,10 +72,11 @@ def view_code_details(ctx: Dict[str, Any], results: List[Dict[str, Any]]) -> Non
     
     while True:
         choice = console.input(
-            "Enter number to view or 'q' to return: "
+            "Enter number to view or 'q' to return (Esc also works): "
         )
         
-        if choice.lower() == 'q':
+        # Handle quit conditions - empty string could be ESC key
+        if choice.lower() == 'q' or not choice:
             return
         
         try:
@@ -110,9 +111,13 @@ def view_code_details(ctx: Dict[str, Any], results: List[Dict[str, Any]]) -> Non
                 console.print("[bold]Options:[/bold]")
                 console.print("  [bold]1[/bold]. Open repository in browser")
                 console.print("  [bold]2[/bold]. Search in this repository")
-                console.print("  [bold]3[/bold]. Back to search results")
+                console.print("  [bold]3[/bold] or any other key. Back to search results")
                 
-                action = console.input("\nEnter choice (1-3): ")
+                action = console.input("\nEnter choice (1-3 or Esc to return): ")
+                
+                # Empty input (possibly from ESC key) returns to results
+                if not action:
+                    continue
                 
                 if action == '1':
                     client.open_in_browser(repo)

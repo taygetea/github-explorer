@@ -146,3 +146,21 @@ class GitHubClient:
             args.append(directory)
             
         return self.run_command(args)
+        
+    def get_repository_files(self, repo_name: str, path: str = "") -> List[Dict[str, Any]]:
+        """Get files and directories in a repository path."""
+        try:
+            url_path = f"repos/{repo_name}/contents"
+            if path:
+                url_path += f"/{path}"
+                
+            output = self.run_command([
+                "api", 
+                url_path,
+                "--jq", "."
+            ])
+            
+            return json.loads(output)
+        except Exception as e:
+            # If there's an error, return an empty list
+            return []
